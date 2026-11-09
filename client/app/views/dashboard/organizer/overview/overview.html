@@ -1,0 +1,428 @@
+<div class="dashboard-layout">
+  <!-- Sidebar Navigation -->
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-title">Faculty Organizer</div>
+    <ul class="sidebar-nav">
+      <li>
+        <a href="#!/dashboard/organizer/overview" class="sidebar-link active">
+          <i class="fas fa-calendar-check" style="width: 18px;"></i> My Assigned Events
+        </a>
+      </li>
+      <li>
+        <a href="#!/events" class="sidebar-link">
+          <i class="fas fa-compass" style="width: 18px;"></i> Campus Catalog
+        </a>
+      </li>
+      <li>
+        <a href="#!/dashboard/profile" class="sidebar-link">
+          <i class="fas fa-user-circle" style="width: 18px;"></i> Faculty Profile
+        </a>
+      </li>
+    </ul>
+
+    <div style="margin-top: 2.5rem; padding: 1.25rem; background: var(--bg-alt); border-radius: var(--radius-md); font-size: 0.85rem; border: 1px solid var(--border-color);">
+      <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
+        <i class="fas fa-chalkboard-teacher" style="color: var(--accent);"></i> Faculty Organizer
+      </div>
+      <div style="color: var(--text-secondary); font-size: 0.8rem;">
+        You can create events, edit details, update status, and export participant rosters.
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="dashboard-main">
+    <!-- Header -->
+    <div class="section-header" style="margin-bottom: 2rem;">
+      <div>
+        <h1 class="section-title" style="font-size: 2rem;">Faculty Organizer Desk</h1>
+        <p class="section-subtitle">Manage your assigned campus summits, track attendee capacity, and export rosters.</p>
+      </div>
+      <button type="button" class="btn btn-primary btn-sm" ng-click="openCreateModal()">
+        <i class="fas fa-plus-circle"></i> Create New Event
+      </button>
+    </div>
+
+    <!-- Analytics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card-title">Assigned Events</div>
+        <div class="stat-card-value" style="color: var(--primary);">{{analytics.totalEvents}}</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Events in your portfolio</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-title">Total Registrations</div>
+        <div class="stat-card-value" style="color: var(--success);">{{analytics.totalRegistrations}}</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Confirmed student seats</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-title">Seat Fill Rate</div>
+        <div class="stat-card-value" style="color: var(--secondary);">{{analytics.avgFillRate}}%</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+          {{analytics.totalRegistrations}} / {{analytics.totalCapacity}} total capacity
+        </div>
+      </div>
+    </div>
+
+    <!-- Loader -->
+    <app-loader ng-if="loading" message="Loading your events portfolio..."></app-loader>
+
+    <!-- Events List Table -->
+    <div ng-if="!loading">
+      <div class="detail-card">
+        <div class="section-header" style="margin-bottom: 1.25rem;">
+          <h2 style="font-size: 1.25rem; font-weight: 800;">
+            Assigned Event Management ({{assignedEvents.length}})
+          </h2>
+          <button type="button" class="btn btn-outline btn-sm" ng-click="loadEvents()" title="Refresh List">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+        </div>
+
+        <div class="table-responsive" ng-if="assignedEvents.length > 0">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Event Title</th>
+                <th>Category</th>
+                <th>Schedule & Venue</th>
+                <th>Capacity Fill</th>
+                <th>Event Status</th>
+                <th style="text-align: right;">Manage Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="event in assignedEvents">
+                <!-- Title & Image Thumbnail -->
+                <td>
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <img ng-src="{{event.image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=100'}}" 
+                         alt="{{event.title}}"
+                         style="width: 44px; height: 44px; border-radius: var(--radius-sm); object-fit: cover;">
+                    <div>
+                      <strong><a ng-href="#!/events/{{event._id}}" title="Open Event Detail Page">{{event.title}}</a></strong>
+                      <div style="font-size: 0.75rem; color: var(--text-muted);">
+                        ID: {{event._id}}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Category -->
+                <td>
+                  <span class="role-tag organizer">{{event.category}}</span>
+                </td>
+
+                <!-- Date & Venue -->
+                <td>
+                  <div><i class="far fa-calendar-alt" style="color: var(--primary);"></i> {{formatDate(event.date)}}</div>
+                  <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
+                    <i class="fas fa-map-marker-alt" style="color: var(--danger); width: 12px;"></i> {{event.location}}
+                  </div>
+                </td>
+
+                <!-- Capacity Progress -->
+                <td style="min-width: 140px;">
+                  <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem;">
+                    {{event.registeredCount || 0}} / {{event.capacity}}
+                  </div>
+                  <div style="width: 100%; height: 6px; background: var(--bg-alt); border-radius: 999px; overflow: hidden;">
+                    <div style="height: 100%; background: var(--primary);" 
+                         ng-style="{'width': ((event.registeredCount / event.capacity) * 100) + '%'}">
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Status Badge -->
+                <td>
+                  <span class="event-card-status status-{{event.status}}" style="position: static;">
+                    {{event.status}}
+                  </span>
+                </td>
+
+                <!-- Actions -->
+                <td style="text-align: right; white-space: nowrap;">
+                  <!-- View Participants -->
+                  <button type="button" 
+                          class="btn btn-outline-primary btn-sm" 
+                          ng-click="openRosterModal(event)"
+                          title="View Registered Students">
+                    <i class="fas fa-users"></i> Attendees ({{event.registeredCount || 0}})
+                  </button>
+
+                  <!-- Edit Event -->
+                  <button type="button" 
+                          class="btn btn-outline btn-sm" 
+                          style="margin-left: 0.35rem;"
+                          ng-click="openEditModal(event)"
+                          title="Edit Event Information">
+                    <i class="fas fa-edit"></i> Edit
+                  </button>
+
+                  <!-- View Public Page -->
+                  <a ng-href="#!/events/{{event._id}}" 
+                     class="btn btn-outline btn-sm" 
+                     style="margin-left: 0.35rem;" 
+                     title="View Public Page">
+                    <i class="fas fa-external-link-alt"></i>
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div ng-if="assignedEvents.length === 0" style="text-align: center; padding: 4rem 1.5rem;">
+          <i class="fas fa-folder-plus" style="font-size: 3.5rem; color: var(--primary); margin-bottom: 1.25rem;"></i>
+          <h2 style="font-size: 1.5rem; font-weight: 800;">No Events in Your Portfolio Yet</h2>
+          <p style="color: var(--text-secondary); max-width: 450px; margin: 0.5rem auto 1.5rem;">
+            Create your first campus event or wait for administrator delegation.
+          </p>
+          <button type="button" class="btn btn-primary" ng-click="openCreateModal()">
+            <i class="fas fa-plus"></i> Create New Event
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL 1: Create New Event                                           -->
+  <!-- ==================================================================== -->
+  <div class="modal-backdrop" ng-if="createModal.show">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fas fa-plus-circle" style="color: var(--primary);"></i> Create New Campus Event
+        </h3>
+        <button type="button" class="modal-close" ng-click="closeCreateModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form ng-submit="saveNewEvent()" id="createEventForm">
+          <div class="form-group">
+            <label class="form-label">Event Title *</label>
+            <input type="text" class="form-control" ng-model="createModal.event.title" placeholder="e.g. Next-Gen Cloud & Microservices Summit" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Category *</label>
+              <select class="form-control" ng-model="createModal.event.category" required>
+                <option ng-repeat="cat in categories" value="{{cat}}">{{cat | uppercase}}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Max Student Capacity *</label>
+              <input type="number" class="form-control" ng-model="createModal.event.capacity" min="1" max="10000" required>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Start Date & Time *</label>
+              <input type="datetime-local" class="form-control" ng-model="createModal.event.date" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">End Date & Time (Optional)</label>
+              <input type="datetime-local" class="form-control" ng-model="createModal.event.endDate">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Venue / Location *</label>
+            <input type="text" class="form-control" ng-model="createModal.event.location" placeholder="e.g. APJ Abdul Kalam Cyber Defense Lab, Block A" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Banner Image URL</label>
+            <input type="url" class="form-control" ng-model="createModal.event.image" placeholder="https://images.unsplash.com/photo-...">
+            <!-- Live Preview -->
+            <div style="margin-top: 0.5rem; display: flex; align-items: center; gap: 1rem;">
+              <img ng-src="{{createModal.event.image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200'}}" 
+                   alt="Preview" 
+                   style="width: 100px; height: 50px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <span style="font-size: 0.8rem; color: var(--text-muted);">Live banner preview</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Event Description * (Min 10 characters)</label>
+            <textarea class="form-control" rows="4" ng-model="createModal.event.description" placeholder="Comprehensive summary of topics, speaker bios, and hands-on session prerequisites..." required></textarea>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" ng-click="closeCreateModal()" ng-disabled="createModal.saving">
+          Cancel
+        </button>
+        <button type="submit" form="createEventForm" class="btn btn-primary" ng-disabled="createModal.saving">
+          <i class="fas fa-check"></i> {{createModal.saving ? 'Publishing Event...' : 'Publish Event'}}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL 2: Edit Event Details & Status                                -->
+  <!-- ==================================================================== -->
+  <div class="modal-backdrop" ng-if="editModal.show">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fas fa-edit" style="color: var(--primary);"></i> Edit Event Details
+        </h3>
+        <button type="button" class="modal-close" ng-click="closeEditModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form ng-submit="updateEvent()" id="editEventForm">
+          <div class="form-group">
+            <label class="form-label">Event Title</label>
+            <input type="text" class="form-control" ng-model="editModal.event.title" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select class="form-control" ng-model="editModal.event.category" required>
+                <option ng-repeat="cat in categories" value="{{cat}}">{{cat | uppercase}}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Event Status</label>
+              <select class="form-control" ng-model="editModal.event.status" required>
+                <option ng-repeat="st in statuses" value="{{st}}">{{st | uppercase}}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Max Student Capacity</label>
+            <input type="number" class="form-control" ng-model="editModal.event.capacity" min="1" max="10000" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Venue / Location</label>
+            <input type="text" class="form-control" ng-model="editModal.event.location" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Banner Image URL</label>
+            <input type="url" class="form-control" ng-model="editModal.event.image">
+            <div style="margin-top: 0.5rem; display: flex; align-items: center; gap: 1rem;">
+              <img ng-src="{{editModal.event.image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200'}}" 
+                   alt="Preview" 
+                   style="width: 100px; height: 50px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <span style="font-size: 0.8rem; color: var(--text-muted);">Live banner preview</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" rows="4" ng-model="editModal.event.description" required></textarea>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" ng-click="closeEditModal()" ng-disabled="editModal.saving">
+          Cancel
+        </button>
+        <button type="submit" form="editEventForm" class="btn btn-primary" ng-disabled="editModal.saving">
+          <i class="fas fa-save"></i> {{editModal.saving ? 'Saving...' : 'Save Changes'}}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL 3: Attendee Roster & Export CSV                                -->
+  <!-- ==================================================================== -->
+  <div class="modal-backdrop" ng-if="rosterModal.show">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">
+            <i class="fas fa-users" style="color: var(--primary);"></i> Registered Attendees Roster
+          </h3>
+          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
+            {{rosterModal.event.title}} ({{rosterModal.registrations.length}} Enrolled)
+          </div>
+        </div>
+        <button type="button" class="modal-close" ng-click="closeRosterModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Roster Actions Toolbar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+          <div class="search-input-group" style="max-width: 320px;">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" 
+                   class="search-input" 
+                   placeholder="Search student by name or email..." 
+                   ng-model="rosterModal.search">
+          </div>
+
+          <button type="button" 
+                  class="btn btn-outline-primary btn-sm" 
+                  ng-click="exportRosterCSV()"
+                  ng-disabled="rosterModal.registrations.length === 0">
+            <i class="fas fa-file-csv"></i> Download Attendees CSV
+          </button>
+        </div>
+
+        <!-- Loader -->
+        <app-loader ng-if="rosterModal.loading" message="Loading enrolled students from database..."></app-loader>
+
+        <!-- Attendees Table -->
+        <div class="table-responsive" ng-if="!rosterModal.loading && (rosterModal.registrations | filter:filterRoster).length > 0">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th>College Email</th>
+                <th>Contact Phone</th>
+                <th>Enrolled Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="reg in rosterModal.registrations | filter:filterRoster">
+                <td>
+                  <strong>{{reg.user ? reg.user.name : 'Unknown Student'}}</strong>
+                </td>
+                <td>{{reg.user ? reg.user.email : 'N/A'}}</td>
+                <td>{{(reg.user && reg.user.phone) ? reg.user.phone : 'Not Provided'}}</td>
+                <td>{{formatDateTime(reg.registeredAt)}}</td>
+                <td>
+                  <span class="role-tag" ng-class="{'participant': reg.status === 'confirmed', 'admin': reg.status === 'cancelled'}">
+                    {{reg.status}}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div ng-if="!rosterModal.loading && (rosterModal.registrations | filter:filterRoster).length === 0" 
+             style="text-align: center; padding: 2.5rem 1rem; color: var(--text-secondary);">
+          <i class="fas fa-user-friends" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 0.75rem;"></i>
+          <p>No registered students match your search.</p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" ng-click="closeRosterModal()">
+          Close Roster
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

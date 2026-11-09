@@ -1,0 +1,230 @@
+<div class="dashboard-layout">
+  <!-- Sidebar Navigation -->
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-title">Student Portal</div>
+    <ul class="sidebar-nav">
+      <li>
+        <a href="#!/dashboard/participant/overview" class="sidebar-link active">
+          <i class="fas fa-ticket-alt" style="width: 18px;"></i> My Registrations
+        </a>
+      </li>
+      <li>
+        <a href="#!/events" class="sidebar-link">
+          <i class="fas fa-compass" style="width: 18px;"></i> Discover Events
+        </a>
+      </li>
+      <li>
+        <a href="#!/dashboard/profile" class="sidebar-link">
+          <i class="fas fa-user-circle" style="width: 18px;"></i> Profile & Security
+        </a>
+      </li>
+    </ul>
+
+    <div style="margin-top: 2.5rem; padding: 1.25rem; background: var(--bg-alt); border-radius: var(--radius-md); font-size: 0.85rem; border: 1px solid var(--border-color);">
+      <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
+        <i class="fas fa-shield-alt" style="color: var(--success);"></i> Verified Student
+      </div>
+      <div style="color: var(--text-secondary); font-size: 0.8rem;">
+        Your bookings are digitally tracked with duplicate prevention.
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="dashboard-main">
+    <!-- Header -->
+    <div class="section-header" style="margin-bottom: 2rem;">
+      <div>
+        <h1 class="section-title" style="font-size: 2rem;">My Event Registrations</h1>
+        <p class="section-subtitle">Track your registered workshops, hackathons, and seat confirmations.</p>
+      </div>
+      <a href="#!/events" class="btn btn-primary btn-sm">
+        <i class="fas fa-plus"></i> Browse & Register
+      </a>
+    </div>
+
+    <!-- Summary Stat Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card-title">Total Bookings</div>
+        <div class="stat-card-value" style="color: var(--primary);">{{stats.total}}</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Lifetime registrations</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-title">Upcoming Events</div>
+        <div class="stat-card-value" style="color: var(--success);">{{stats.upcoming}}</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Active confirmed seats</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-title">Cancelled / Past</div>
+        <div class="stat-card-value" style="color: var(--warning);">{{stats.cancelled}}</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Withdrawn registrations</div>
+      </div>
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div class="filter-bar" style="margin-bottom: 1.75rem;">
+      <div class="search-input-group">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" 
+               class="search-input" 
+               placeholder="Filter by event title, venue, or category..."
+               ng-model="searchQuery">
+      </div>
+
+      <select class="filter-select" ng-model="statusFilter">
+        <option value="">All Statuses</option>
+        <option value="confirmed">Confirmed Only</option>
+        <option value="cancelled">Cancelled Only</option>
+      </select>
+
+      <button type="button" class="btn btn-outline btn-sm" ng-click="searchQuery = ''; statusFilter = '';" title="Reset Filters">
+        <i class="fas fa-undo"></i> Reset
+      </button>
+    </div>
+
+    <!-- Loader -->
+    <app-loader ng-if="loading" message="Loading your registration history..."></app-loader>
+
+    <!-- Registrations Content -->
+    <div ng-if="!loading">
+      <div class="detail-card">
+        <div class="table-responsive" ng-if="(registrations | filter:filterRegistrations).length > 0">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Event & Topic</th>
+                <th>Category</th>
+                <th>Event Date & Venue</th>
+                <th>Enrolled On</th>
+                <th>Booking Status</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="reg in registrations | filter:filterRegistrations">
+                <!-- Event Title -->
+                <td>
+                  <strong style="font-size: 1rem;">
+                    <a ng-href="#!/events/{{reg.event._id}}" title="View Event Details">
+                      {{reg.event.title}}
+                    </a>
+                  </strong>
+                  <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
+                    Capacity: {{reg.event.registeredCount}} / {{reg.event.capacity}} registered
+                  </div>
+                </td>
+
+                <!-- Category -->
+                <td>
+                  <span class="role-tag organizer">{{reg.event.category}}</span>
+                </td>
+
+                <!-- Date & Venue -->
+                <td>
+                  <div><i class="far fa-calendar-alt" style="color: var(--primary);"></i> <strong>{{formatDate(reg.event.date)}}</strong></div>
+                  <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
+                    <i class="fas fa-map-marker-alt" style="color: var(--danger); width: 12px;"></i> {{reg.event.location}}
+                  </div>
+                </td>
+
+                <!-- Enrolled Timestamp -->
+                <td style="font-size: 0.85rem; color: var(--text-muted);">
+                  {{formatDateTime(reg.registeredAt)}}
+                </td>
+
+                <!-- Booking Status -->
+                <td>
+                  <span class="role-tag" ng-class="{'participant': reg.status === 'confirmed', 'admin': reg.status === 'cancelled'}">
+                    {{reg.status}}
+                  </span>
+                </td>
+
+                <!-- Actions -->
+                <td style="text-align: right; white-space: nowrap;">
+                  <a ng-href="#!/events/{{reg.event._id}}" class="btn btn-outline-primary btn-sm" title="View Event Page">
+                    <i class="fas fa-eye"></i> Details
+                  </a>
+
+                  <!-- Cancel Button (if confirmed) -->
+                  <button type="button" 
+                          class="btn btn-outline btn-sm" 
+                          style="color: var(--danger); margin-left: 0.4rem;"
+                          ng-if="reg.status === 'confirmed'"
+                          ng-click="openCancelModal(reg)"
+                          ng-disabled="cancellingId === reg._id"
+                          title="Cancel Registration">
+                    <i class="fas fa-times-circle"></i> Cancel
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty Filter Results -->
+        <div ng-if="(registrations | filter:filterRegistrations).length === 0 && registrations.length > 0" 
+             style="text-align: center; padding: 3rem 1rem;">
+          <i class="fas fa-search" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 0.75rem;"></i>
+          <h3>No Matching Registrations</h3>
+          <p style="color: var(--text-secondary); margin-top: 0.25rem;">Try clearing your search query or status filter.</p>
+          <button type="button" class="btn btn-outline-primary btn-sm" style="margin-top: 1rem;" ng-click="searchQuery = ''; statusFilter = '';">
+            Clear Filters
+          </button>
+        </div>
+
+        <!-- Zero Total Registrations -->
+        <div ng-if="registrations.length === 0" style="text-align: center; padding: 4rem 1.5rem;">
+          <i class="fas fa-calendar-plus" style="font-size: 3.5rem; color: var(--primary); margin-bottom: 1.25rem;"></i>
+          <h2 style="font-size: 1.5rem; font-weight: 800;">No Event Registrations Yet</h2>
+          <p style="color: var(--text-secondary); max-width: 480px; margin: 0.5rem auto 1.75rem;">
+            You have not registered for any campus summits or hackathons yet. Discover available events and reserve your seat.
+          </p>
+          <a href="#!/events" class="btn btn-primary btn-lg">
+            <i class="fas fa-compass"></i> Discover Campus Events
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Cancel Confirmation Modal -->
+  <div class="modal-backdrop" ng-if="cancelModal.show">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: var(--danger);">
+          <i class="fas fa-exclamation-triangle"></i> Cancel Event Registration
+        </h3>
+        <button type="button" class="modal-close" ng-click="closeCancelModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="font-size: 1.05rem; color: var(--text-primary); margin-bottom: 1rem;">
+          Are you sure you want to withdraw your registration for:
+        </p>
+        <div style="background: var(--bg-alt); padding: 1rem; border-radius: var(--radius-md); border-left: 4px solid var(--danger); margin-bottom: 1.25rem;">
+          <strong style="font-size: 1.1rem; display: block; color: var(--text-primary);">
+            {{cancelModal.reg.event.title}}
+          </strong>
+          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.35rem;">
+            Scheduled: {{formatDate(cancelModal.reg.event.date)}} at {{cancelModal.reg.event.location}}
+          </div>
+        </div>
+        <p style="font-size: 0.9rem; color: var(--text-secondary);">
+          Your reserved seat will be immediately released and returned to the public event capacity pool.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" ng-click="closeCancelModal()" ng-disabled="cancellingId">
+          Keep Registration
+        </button>
+        <button type="button" class="btn btn-danger" ng-click="confirmCancel()" ng-disabled="cancellingId">
+          <i class="fas fa-times-circle"></i> {{cancellingId ? 'Cancelling...' : 'Confirm Cancellation'}}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

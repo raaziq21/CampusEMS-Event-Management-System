@@ -1,0 +1,153 @@
+<div class="container section">
+  <!-- Back Button -->
+  <div style="margin-bottom: 1.5rem;">
+    <a href="#!/events" class="btn btn-outline btn-sm">
+      <i class="fas fa-arrow-left"></i> Back to All Events
+    </a>
+  </div>
+
+  <!-- Loader -->
+  <app-loader ng-if="loading" message="Loading event details..."></app-loader>
+
+  <div ng-if="!loading && event">
+    <!-- Header Banner -->
+    <div class="event-detail-header">
+      <img ng-src="{{event.image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200'}}" 
+           alt="{{event.title}}" 
+           class="event-detail-banner"
+           onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200';">
+      
+      <div class="event-detail-overlay">
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <span class="event-card-category" style="position: static;">{{event.category}}</span>
+          <span class="event-card-status status-{{event.status}}" style="position: static;">{{event.status}}</span>
+        </div>
+        <h1 style="font-size: 2.5rem; font-weight: 800; line-height: 1.2; text-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+          {{event.title}}
+        </h1>
+      </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="event-detail-grid">
+      <!-- Left Column: Description & Program Overview -->
+      <div>
+        <div class="detail-card">
+          <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.25rem; color: var(--text-primary);">
+            About this Event
+          </h2>
+          <p style="font-size: 1.05rem; line-height: 1.8; color: var(--text-secondary); white-space: pre-line;">
+            {{event.description}}
+          </p>
+        </div>
+
+        <!-- Venue & Location Details -->
+        <div class="detail-card">
+          <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">
+            <i class="fas fa-map-marker-alt" style="color: var(--danger); margin-right: 0.5rem;"></i>
+            Event Venue & Schedule
+          </h3>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem; color: var(--text-secondary);">
+            <div><strong>Location:</strong> {{event.location}}</div>
+            <div><strong>Start Time:</strong> {{formatDate(event.date)}} at {{formatTime(event.date)}}</div>
+            <div ng-if="event.endDate"><strong>End Time:</strong> {{formatDate(event.endDate)}} at {{formatTime(event.endDate)}}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Registration Card & Organizer Info -->
+      <div>
+        <!-- Registration Action Card -->
+        <div class="detail-card" style="border-top: 4px solid var(--primary);">
+          <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 1rem;">
+            Registration Status
+          </h3>
+
+          <!-- Capacity Bar -->
+          <div style="margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem;">
+              <span>Seats Filled</span>
+              <span>{{event.registeredCount || 0}} / {{event.capacity}}</span>
+            </div>
+            <div style="width: 100%; height: 8px; background: var(--bg-alt); border-radius: 999px; overflow: hidden;">
+              <div style="height: 100%; background: var(--primary); transition: width 0.3s ease;" 
+                   ng-style="{'width': ((event.registeredCount / event.capacity) * 100) + '%'}">
+              </div>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem; text-align: right;">
+              {{event.capacity - (event.registeredCount || 0)}} spots remaining
+            </div>
+          </div>
+
+          <!-- Action Button States -->
+          <div ng-if="!isRegistered">
+            <!-- Event Full -->
+            <button type="button" 
+                    class="btn btn-outline btn-lg" 
+                    style="width: 100%;" 
+                    disabled 
+                    ng-if="event.registeredCount >= event.capacity">
+              <i class="fas fa-ban"></i> Event Full
+            </button>
+
+            <!-- Event Cancelled or Completed -->
+            <button type="button" 
+                    class="btn btn-outline btn-lg" 
+                    style="width: 100%;" 
+                    disabled 
+                    ng-if="event.status === 'completed' || event.status === 'cancelled'">
+              <i class="fas fa-lock"></i> Registration Closed ({{event.status}})
+            </button>
+
+            <!-- Register Button (Enabled) -->
+            <button type="button" 
+                    class="btn btn-primary btn-lg" 
+                    style="width: 100%;" 
+                    ng-if="event.registeredCount < event.capacity && event.status !== 'completed' && event.status !== 'cancelled'"
+                    ng-click="register()"
+                    ng-disabled="registering">
+              <i class="fas fa-ticket-alt"></i> 
+              {{registering ? 'Registering...' : 'Register for this Event'}}
+            </button>
+          </div>
+
+          <!-- Already Registered Confirmation -->
+          <div ng-if="isRegistered" style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-md); padding: 1.25rem; text-align: center;">
+            <i class="fas fa-check-circle" style="color: #059669; font-size: 2rem; margin-bottom: 0.5rem;"></i>
+            <h4 style="color: #065f46; font-size: 1.05rem; font-weight: 700;">You are Registered!</h4>
+            <p style="color: #047857; font-size: 0.85rem; margin-top: 0.25rem;">
+              Your seat is confirmed. View details in your participant dashboard.
+            </p>
+            <a href="#!/dashboard/participant/registrations" class="btn btn-sm btn-outline-primary" style="margin-top: 0.75rem;">
+              View My Registrations
+            </a>
+          </div>
+
+          <div style="margin-top: 1.25rem; font-size: 0.8rem; color: var(--text-muted); text-align: center;">
+            <i class="fas fa-info-circle"></i> Instant registration. Free for enrolled college students.
+          </div>
+        </div>
+
+        <!-- Organizer Profile Card -->
+        <div class="detail-card">
+          <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">
+            Faculty Organizer
+          </h4>
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem;">
+              {{event.organizer ? event.organizer.name.charAt(0) : 'E'}}
+            </div>
+            <div>
+              <div style="font-weight: 700; color: var(--text-primary);">
+                {{event.organizer ? event.organizer.name : 'College Event Board'}}
+              </div>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">
+                {{event.organizer ? event.organizer.email : 'events@ems.edu'}}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

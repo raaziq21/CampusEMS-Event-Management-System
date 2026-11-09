@@ -1,0 +1,805 @@
+<div class="dashboard-layout">
+  <!-- Sidebar Navigation -->
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-title">Admin Console</div>
+    <ul class="sidebar-nav">
+      <li>
+        <button type="button" 
+                class="sidebar-link" 
+                ng-class="{'active': activeTab === 'overview'}"
+                ng-click="switchTab('overview')">
+          <i class="fas fa-chart-pie" style="width: 18px;"></i> Overview & Analytics
+        </button>
+      </li>
+      <li>
+        <button type="button" 
+                class="sidebar-link" 
+                ng-class="{'active': activeTab === 'events'}"
+                ng-click="switchTab('events')">
+          <i class="fas fa-calendar-alt" style="width: 18px;"></i> Event Management
+        </button>
+      </li>
+      <li>
+        <button type="button" 
+                class="sidebar-link" 
+                ng-class="{'active': activeTab === 'users'}"
+                ng-click="switchTab('users')">
+          <i class="fas fa-users-cog" style="width: 18px;"></i> User & Role Control
+        </button>
+      </li>
+      <li>
+        <a href="#!/dashboard/profile" class="sidebar-link">
+          <i class="fas fa-user-circle" style="width: 18px;"></i> Admin Profile
+        </a>
+      </li>
+    </ul>
+
+    <div style="margin-top: 2.5rem; padding: 1.25rem; background: var(--bg-alt); border-radius: var(--radius-md); font-size: 0.85rem; border: 1px solid var(--border-color);">
+      <div style="font-weight: 700; color: #b91c1c; margin-bottom: 0.25rem;">
+        <i class="fas fa-shield-alt"></i> Super Administrator
+      </div>
+      <div style="color: var(--text-secondary); font-size: 0.8rem;">
+        Full platform authority, organizer delegations, and cascading delete capabilities.
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="dashboard-main">
+
+    <!-- ================================================================== -->
+    <!-- TAB 1: OVERVIEW & PLATFORM ANALYTICS                              -->
+    <!-- ================================================================== -->
+    <div ng-if="activeTab === 'overview'">
+      <!-- Header -->
+      <div class="section-header" style="margin-bottom: 2rem;">
+        <div>
+          <h1 class="section-title" style="font-size: 2rem;">Administrator Overview</h1>
+          <p class="section-subtitle">Real-time platform metrics and live telemetry from MongoDB Atlas.</p>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm" ng-click="loadDashboardData()" title="Refresh Dashboard">
+          <i class="fas fa-sync-alt"></i> Refresh Analytics
+        </button>
+      </div>
+
+      <app-loader ng-if="loading" message="Loading platform analytics from database..."></app-loader>
+
+      <div ng-if="!loading && stats">
+        <!-- 4 Platform Metric Cards -->
+        <div class="stats-grid">
+          <!-- Card 1: Users Breakdown -->
+          <div class="stat-card">
+            <div class="stat-card-title">Registered Accounts</div>
+            <div class="stat-card-value" style="color: var(--primary);">{{stats.users.total}}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem; display: flex; gap: 0.35rem; flex-wrap: wrap;">
+              <span class="role-tag participant">{{stats.users.participants}} Students</span>
+              <span class="role-tag organizer">{{stats.users.organizers}} Faculty</span>
+              <span class="role-tag admin">{{stats.users.admins}} Admin</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Events Breakdown -->
+          <div class="stat-card">
+            <div class="stat-card-title">Campus Events</div>
+            <div class="stat-card-value" style="color: var(--secondary);">{{stats.events.total}}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem; display: flex; gap: 0.35rem; flex-wrap: wrap;">
+              <span class="event-card-status status-upcoming" style="position: static; font-size: 0.65rem;">{{stats.events.upcoming}} Upcoming</span>
+              <span class="event-card-status status-ongoing" style="position: static; font-size: 0.65rem;">{{stats.events.ongoing}} Ongoing</span>
+              <span class="event-card-status status-completed" style="position: static; font-size: 0.65rem;">{{stats.events.completed}} Done</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Registrations -->
+          <div class="stat-card">
+            <div class="stat-card-title">Event Registrations</div>
+            <div class="stat-card-value" style="color: var(--success);">{{stats.registrations.confirmed}}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">
+              {{stats.registrations.total}} total recorded (including cancellations)
+            </div>
+          </div>
+
+          <!-- Card 4: Overall Seat Utilization -->
+          <div class="stat-card">
+            <div class="stat-card-title">Seat Utilization</div>
+            <div class="stat-card-value" style="color: var(--accent);">{{stats.capacity.utilizationRate || 0}}%</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">
+              {{stats.registrations.confirmed}} / {{stats.capacity.total || 0}} total capacity
+            </div>
+          </div>
+        </div>
+
+        <!-- Two Columns: Recent Events & Recent Registrations -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+          <!-- Recent Events -->
+          <div class="detail-card">
+            <div class="section-header" style="margin-bottom: 1rem;">
+              <h3 style="font-size: 1.15rem; font-weight: 800;">
+                <i class="fas fa-calendar" style="color: var(--primary); margin-right: 0.35rem;"></i> Recent Events
+              </h3>
+              <button type="button" class="btn btn-outline-primary btn-sm" ng-click="switchTab('events')">
+                View All
+              </button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Bookings</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="e in recentEvents">
+                    <td>
+                      <strong><a ng-href="#!/events/{{e._id}}">{{e.title}}</a></strong>
+                      <div style="font-size: 0.75rem; color: var(--text-muted);">{{e.category}} • {{e.location}}</div>
+                    </td>
+                    <td>
+                      <span class="event-card-status status-{{e.status}}" style="position: static; font-size: 0.7rem;">{{e.status}}</span>
+                    </td>
+                    <td>{{e.registeredCount}} / {{e.capacity}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Recent Registrations -->
+          <div class="detail-card">
+            <div class="section-header" style="margin-bottom: 1rem;">
+              <h3 style="font-size: 1.15rem; font-weight: 800;">
+                <i class="fas fa-ticket-alt" style="color: var(--success); margin-right: 0.35rem;"></i> Recent Bookings
+              </h3>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">Real-time stream</span>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Event</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="r in recentRegistrations">
+                    <td>
+                      <strong>{{r.user ? r.user.name : 'Unknown'}}</strong>
+                      <div style="font-size: 0.75rem; color: var(--text-muted);">{{r.user ? r.user.email : ''}}</div>
+                    </td>
+                    <td>{{r.event ? r.event.title : 'Deleted Event'}}</td>
+                    <td>
+                      <span class="role-tag" ng-class="{'participant': r.status === 'confirmed', 'admin': r.status === 'cancelled'}">
+                        {{r.status}}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- TAB 2: FULL EVENT MANAGEMENT (CRUD + ORGANIZER ASSIGNMENT)         -->
+    <!-- ================================================================== -->
+    <div ng-if="activeTab === 'events'">
+      <div class="section-header" style="margin-bottom: 2rem;">
+        <div>
+          <h1 class="section-title" style="font-size: 2rem;">Campus Event Management</h1>
+          <p class="section-subtitle">Create, reassign, update, or delete all campus events across all faculties.</p>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" ng-click="openCreateEventModal()">
+          <i class="fas fa-plus-circle"></i> Create New Event
+        </button>
+      </div>
+
+      <!-- Events Filter Bar -->
+      <div class="filter-bar" style="margin-bottom: 1.75rem;">
+        <div class="search-input-group">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" 
+                 class="search-input" 
+                 placeholder="Search by event title, location, or organizer..."
+                 ng-model="eventFilters.search">
+        </div>
+
+        <select class="filter-select" ng-model="eventFilters.category">
+          <option value="">All Categories</option>
+          <option ng-repeat="cat in categories" value="{{cat}}">{{cat | uppercase}}</option>
+        </select>
+
+        <select class="filter-select" ng-model="eventFilters.status">
+          <option value="">All Statuses</option>
+          <option ng-repeat="st in statuses" value="{{st}}">{{st | uppercase}}</option>
+        </select>
+
+        <button type="button" class="btn btn-outline btn-sm" ng-click="eventFilters.search = ''; eventFilters.category = ''; eventFilters.status = '';" title="Reset Filters">
+          <i class="fas fa-undo"></i> Reset
+        </button>
+      </div>
+
+      <!-- Events Table -->
+      <div class="detail-card">
+        <div class="table-responsive" ng-if="(events | filter:filterEvents).length > 0">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Event Info</th>
+                <th>Category</th>
+                <th>Schedule & Venue</th>
+                <th>Assigned Organizer</th>
+                <th>Capacity Fill</th>
+                <th>Status</th>
+                <th style="text-align: right;">Admin Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="event in events | filter:filterEvents">
+                <!-- Thumbnail & Title -->
+                <td>
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <img ng-src="{{event.image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=100'}}" 
+                         alt="{{event.title}}"
+                         style="width: 44px; height: 44px; border-radius: var(--radius-sm); object-fit: cover;">
+                    <div>
+                      <strong><a ng-href="#!/events/{{event._id}}" title="View Public Page">{{event.title}}</a></strong>
+                      <div style="font-size: 0.75rem; color: var(--text-muted);">
+                        ID: {{event._id}}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Category -->
+                <td>
+                  <span class="role-tag organizer">{{event.category}}</span>
+                </td>
+
+                <!-- Schedule & Venue -->
+                <td>
+                  <div><i class="far fa-calendar-alt" style="color: var(--primary);"></i> {{formatDate(event.date)}}</div>
+                  <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
+                    <i class="fas fa-map-marker-alt" style="color: var(--danger); width: 12px;"></i> {{event.location}}
+                  </div>
+                </td>
+
+                <!-- Assigned Organizer -->
+                <td>
+                  <div ng-if="event.organizer">
+                    <span class="role-tag organizer">
+                      <i class="fas fa-user-tie"></i> {{event.organizer.name}}
+                    </span>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
+                      {{event.organizer.email}}
+                    </div>
+                  </div>
+                  <div ng-if="!event.organizer">
+                    <span class="role-tag" style="background: #f1f5f9; color: #64748b; border: 1px dashed #cbd5e1;">
+                      Unassigned
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Capacity Progress -->
+                <td style="min-width: 130px;">
+                  <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem;">
+                    {{event.registeredCount || 0}} / {{event.capacity}}
+                  </div>
+                  <div style="width: 100%; height: 6px; background: var(--bg-alt); border-radius: 999px; overflow: hidden;">
+                    <div style="height: 100%; background: var(--primary);" 
+                         ng-style="{'width': ((event.registeredCount / event.capacity) * 100) + '%'}">
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Status -->
+                <td>
+                  <span class="event-card-status status-{{event.status}}" style="position: static; font-size: 0.75rem;">
+                    {{event.status}}
+                  </span>
+                </td>
+
+                <!-- Admin Action Buttons -->
+                <td style="text-align: right; white-space: nowrap;">
+                  <!-- Attendees Roster -->
+                  <button type="button" 
+                          class="btn btn-outline-primary btn-sm" 
+                          ng-click="openRosterModal(event)"
+                          title="View Registered Students">
+                    <i class="fas fa-users"></i> ({{event.registeredCount || 0}})
+                  </button>
+
+                  <!-- Edit -->
+                  <button type="button" 
+                          class="btn btn-outline btn-sm" 
+                          style="margin-left: 0.35rem;"
+                          ng-click="openEditEventModal(event)"
+                          title="Edit Event & Organizer">
+                    <i class="fas fa-edit"></i>
+                  </button>
+
+                  <!-- Delete -->
+                  <button type="button" 
+                          class="btn btn-outline btn-sm" 
+                          style="color: var(--danger); margin-left: 0.35rem;"
+                          ng-click="openDeleteEventModal(event)"
+                          title="Delete Event & Cleanup Bookings">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div ng-if="(events | filter:filterEvents).length === 0" style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">
+          <i class="fas fa-calendar-times" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 0.75rem;"></i>
+          <p>No campus events match your search criteria.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- TAB 3: USER & ROLE MANAGEMENT                                      -->
+    <!-- ================================================================== -->
+    <div ng-if="activeTab === 'users'">
+      <div class="section-header" style="margin-bottom: 2rem;">
+        <div>
+          <h1 class="section-title" style="font-size: 2rem;">User & Role Governance</h1>
+          <p class="section-subtitle">Manage campus access levels, promote faculty to organizers, and govern accounts.</p>
+        </div>
+        <div style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">
+          Total Registered Accounts: {{users.length}}
+        </div>
+      </div>
+
+      <!-- Users Filter Bar -->
+      <div class="filter-bar" style="margin-bottom: 1.75rem;">
+        <div class="search-input-group">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" 
+                 class="search-input" 
+                 placeholder="Search student or faculty by name, email, or phone..."
+                 ng-model="userFilters.search">
+        </div>
+
+        <select class="filter-select" ng-model="userFilters.role">
+          <option value="">All Roles</option>
+          <option value="participant">Participants Only</option>
+          <option value="organizer">Organizers Only</option>
+          <option value="admin">Administrators Only</option>
+        </select>
+
+        <button type="button" class="btn btn-outline btn-sm" ng-click="userFilters.search = ''; userFilters.role = '';" title="Reset Filters">
+          <i class="fas fa-undo"></i> Reset
+        </button>
+      </div>
+
+      <!-- Users Table -->
+      <div class="detail-card">
+        <div class="table-responsive" ng-if="(users | filter:filterUsers).length > 0">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>User Details</th>
+                <th>Contact Phone</th>
+                <th>Registered Date</th>
+                <th>Current Role</th>
+                <th>Modify Role Level</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="u in users | filter:filterUsers">
+                <!-- User Details -->
+                <td>
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem;">
+                      {{u.name.charAt(0).toUpperCase()}}
+                    </div>
+                    <div>
+                      <strong>{{u.name}}</strong>
+                      <span ng-if="u._id === currentUser._id" class="role-tag admin" style="margin-left: 0.35rem; font-size: 0.65rem;">You</span>
+                      <div style="font-size: 0.8rem; color: var(--text-muted);">{{u.email}}</div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Phone -->
+                <td>{{u.phone || 'Not Provided'}}</td>
+
+                <!-- Registered Date -->
+                <td>{{formatDate(u.createdAt)}}</td>
+
+                <!-- Current Role -->
+                <td>
+                  <span class="role-tag {{u.role}}">{{u.role}}</span>
+                </td>
+
+                <!-- Role Selector (with Self-Demotion Lock) -->
+                <td>
+                  <div ng-if="u._id !== currentUser._id">
+                    <select class="filter-select" 
+                            style="padding: 0.35rem 0.65rem; font-size: 0.85rem;"
+                            ng-model="u.role"
+                            ng-change="changeRole(u, u.role)">
+                      <option value="participant">Participant</option>
+                      <option value="organizer">Organizer</option>
+                      <option value="admin">Administrator</option>
+                    </select>
+                  </div>
+                  <div ng-if="u._id === currentUser._id" style="font-size: 0.8rem; color: var(--text-muted);">
+                    <i class="fas fa-lock"></i> Protected (Current Session)
+                  </div>
+                </td>
+
+                <!-- Delete User (with Self-Deletion Lock) -->
+                <td style="text-align: right;">
+                  <button type="button" 
+                          class="btn btn-outline btn-sm" 
+                          style="color: var(--danger);"
+                          ng-if="u._id !== currentUser._id"
+                          ng-click="openDeleteUserModal(u)"
+                          title="Delete User Account">
+                    <i class="fas fa-user-minus"></i> Delete
+                  </button>
+                  <span ng-if="u._id === currentUser._id" style="font-size: 0.8rem; color: var(--text-muted);">
+                    Active
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div ng-if="(users | filter:filterUsers).length === 0" style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">
+          <i class="fas fa-user-slash" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 0.75rem;"></i>
+          <p>No registered accounts match your search filter.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL: Admin Create Event                                            -->
+  <!-- ==================================================================== -->
+  <div class="modal-backdrop" ng-if="createEventModal.show">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fas fa-plus-circle" style="color: var(--primary);"></i> Create Campus Event
+        </h3>
+        <button type="button" class="modal-close" ng-click="closeCreateEventModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form ng-submit="saveNewEvent()" id="adminCreateEventForm">
+          <div class="form-group">
+            <label class="form-label">Event Title *</label>
+            <input type="text" class="form-control" ng-model="createEventModal.event.title" placeholder="e.g. Cybersecurity Leadership Conclave" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Category *</label>
+              <select class="form-control" ng-model="createEventModal.event.category" required>
+                <option ng-repeat="cat in categories" value="{{cat}}">{{cat | uppercase}}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Max Student Capacity *</label>
+              <input type="number" class="form-control" ng-model="createEventModal.event.capacity" min="1" max="100000" required>
+            </div>
+          </div>
+
+          <!-- Assign Faculty Organizer Dropdown -->
+          <div class="form-group">
+            <label class="form-label">Assign Faculty Organizer (Optional)</label>
+            <select class="form-control" ng-model="createEventModal.event.organizer">
+              <option value="">-- No Organizer Assigned (Admin Managed) --</option>
+              <option ng-repeat="org in organizers" value="{{org._id}}">
+                {{org.name}} ({{org.email}})
+              </option>
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Start Date & Time *</label>
+              <input type="datetime-local" class="form-control" ng-model="createEventModal.event.date" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">End Date & Time</label>
+              <input type="datetime-local" class="form-control" ng-model="createEventModal.event.endDate">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Venue / Location *</label>
+            <input type="text" class="form-control" ng-model="createEventModal.event.location" placeholder="e.g. Visvesvaraya Auditorium, Campus Block C" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Banner Image URL</label>
+            <input type="url" class="form-control" ng-model="createEventModal.event.image" placeholder="https://images.unsplash.com/photo-...">
+            <div style="margin-top: 0.5rem; display: flex; align-items: center; gap: 1rem;">
+              <img ng-src="{{createEventModal.event.image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200'}}" 
+                   alt="Preview" 
+                   style="width: 100px; height: 50px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <span style="font-size: 0.8rem; color: var(--text-muted);">Live banner preview</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description *</label>
+            <textarea class="form-control" rows="4" ng-model="createEventModal.event.description" placeholder="Comprehensive agenda, prerequisites, and resource overview..." required></textarea>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" ng-click="closeCreateEventModal()" ng-disabled="createEventModal.saving">
+          Cancel
+        </button>
+        <button type="submit" form="adminCreateEventForm" class="btn btn-primary" ng-disabled="createEventModal.saving">
+          <i class="fas fa-check"></i> {{createEventModal.saving ? 'Creating...' : 'Create Event'}}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL: Admin Edit Event & Reassign Organizer                         -->
+  <!-- ==================================================================== -->
+  <div class="modal-backdrop" ng-if="editEventModal.show">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fas fa-edit" style="color: var(--primary);"></i> Edit Event & Assign Organizer
+        </h3>
+        <button type="button" class="modal-close" ng-click="closeEditEventModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form ng-submit="updateEvent()" id="adminEditEventForm">
+          <div class="form-group">
+            <label class="form-label">Event Title</label>
+            <input type="text" class="form-control" ng-model="editEventModal.event.title" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select class="form-control" ng-model="editEventModal.event.category" required>
+                <option ng-repeat="cat in categories" value="{{cat}}">{{cat | uppercase}}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Event Status</label>
+              <select class="form-control" ng-model="editEventModal.event.status" required>
+                <option ng-repeat="st in statuses" value="{{st}}">{{st | uppercase}}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Organizer Reassignment -->
+          <div class="form-group">
+            <label class="form-label">Assigned Faculty Organizer</label>
+            <select class="form-control" ng-model="editEventModal.event.organizer">
+              <option value="">-- No Organizer Assigned (Unassigned) --</option>
+              <option ng-repeat="org in organizers" value="{{org._id}}">
+                {{org.name}} ({{org.email}})
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Max Student Capacity</label>
+            <input type="number" class="form-control" ng-model="editEventModal.event.capacity" min="1" max="100000" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Venue / Location</label>
+            <input type="text" class="form-control" ng-model="editEventModal.event.location" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Banner Image URL</label>
+            <input type="url" class="form-control" ng-model="editEventModal.event.image">
+            <div style="margin-top: 0.5rem; display: flex; align-items: center; gap: 1rem;">
+              <img ng-src="{{editEventModal.event.image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200'}}" 
+                   alt="Preview" 
+                   style="width: 100px; height: 50px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <span style="font-size: 0.8rem; color: var(--text-muted);">Live banner preview</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" rows="4" ng-model="editEventModal.event.description" required></textarea>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" ng-click="closeEditEventModal()" ng-disabled="editEventModal.saving">
+          Cancel
+        </button>
+        <button type="submit" form="adminEditEventForm" class="btn btn-primary" ng-disabled="editEventModal.saving">
+          <i class="fas fa-save"></i> {{editEventModal.saving ? 'Updating...' : 'Save Changes'}}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL: Delete Event Confirmation                                     -->
+  <!-- ==================================================================== -->
+  <div class="modal-backdrop" ng-if="deleteEventModal.show">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: var(--danger);">
+          <i class="fas fa-exclamation-triangle"></i> Delete Event
+        </h3>
+        <button type="button" class="modal-close" ng-click="closeDeleteEventModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="font-size: 1.05rem; color: var(--text-primary); margin-bottom: 1rem;">
+          Are you sure you want to permanently delete this event?
+        </p>
+        <div style="background: var(--bg-alt); padding: 1rem; border-radius: var(--radius-md); border-left: 4px solid var(--danger); margin-bottom: 1.25rem;">
+          <strong style="font-size: 1.1rem; display: block; color: var(--text-primary);">
+            {{deleteEventModal.event.title}}
+          </strong>
+          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.35rem;">
+            Location: {{deleteEventModal.event.location}} • Capacity: {{deleteEventModal.event.capacity}}
+          </div>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--danger);">
+          <i class="fas fa-shield-alt"></i> <strong>Cascading Cleanup:</strong> All student registrations associated with this event will be permanently deleted from the database.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" ng-click="closeDeleteEventModal()" ng-disabled="deleteEventModal.deleting">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-danger" ng-click="confirmDeleteEvent()" ng-disabled="deleteEventModal.deleting">
+          <i class="fas fa-trash-alt"></i> {{deleteEventModal.deleting ? 'Deleting...' : 'Delete Event & Cleanup'}}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL: Delete User Confirmation                                      -->
+  <!-- ==================================================================== -->
+  <div class="modal-backdrop" ng-if="deleteUserModal.show">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: var(--danger);">
+          <i class="fas fa-user-times"></i> Delete User Account
+        </h3>
+        <button type="button" class="modal-close" ng-click="closeDeleteUserModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="font-size: 1.05rem; color: var(--text-primary); margin-bottom: 1rem;">
+          Are you sure you want to permanently delete this user account?
+        </p>
+        <div style="background: var(--bg-alt); padding: 1rem; border-radius: var(--radius-md); border-left: 4px solid var(--danger); margin-bottom: 1.25rem;">
+          <strong style="font-size: 1.1rem; display: block; color: var(--text-primary);">
+            {{deleteUserModal.user.name}}
+          </strong>
+          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.35rem;">
+            Email: {{deleteUserModal.user.email}} • Role: {{deleteUserModal.user.role}}
+          </div>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--danger);">
+          All registrations submitted by this user will be deleted and relevant event seat counts will be recalculated.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" ng-click="closeDeleteUserModal()" ng-disabled="deleteUserModal.deleting">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-danger" ng-click="confirmDeleteUser()" ng-disabled="deleteUserModal.deleting">
+          <i class="fas fa-user-minus"></i> {{deleteUserModal.deleting ? 'Deleting...' : 'Delete Account'}}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL: Attendee Roster & CSV Export                                  -->
+  <!-- ==================================================================== -->
+  <div class="modal-backdrop" ng-if="rosterModal.show">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">
+            <i class="fas fa-users" style="color: var(--primary);"></i> Event Attendee Roster
+          </h3>
+          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
+            {{rosterModal.event.title}} ({{rosterModal.registrations.length}} Enrolled)
+          </div>
+        </div>
+        <button type="button" class="modal-close" ng-click="closeRosterModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+          <div class="search-input-group" style="max-width: 320px;">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" 
+                   class="search-input" 
+                   placeholder="Search student by name or email..." 
+                   ng-model="rosterModal.search">
+          </div>
+
+          <button type="button" 
+                  class="btn btn-outline-primary btn-sm" 
+                  ng-click="exportRosterCSV()"
+                  ng-disabled="rosterModal.registrations.length === 0">
+            <i class="fas fa-file-csv"></i> Download Roster CSV
+          </button>
+        </div>
+
+        <app-loader ng-if="rosterModal.loading" message="Loading attendee records..."></app-loader>
+
+        <div class="table-responsive" ng-if="!rosterModal.loading && (rosterModal.registrations | filter:filterRoster).length > 0">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th>College Email</th>
+                <th>Contact Phone</th>
+                <th>Enrolled Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="reg in rosterModal.registrations | filter:filterRoster">
+                <td>
+                  <strong>{{reg.user ? reg.user.name : 'Unknown Student'}}</strong>
+                </td>
+                <td>{{reg.user ? reg.user.email : 'N/A'}}</td>
+                <td>{{(reg.user && reg.user.phone) ? reg.user.phone : 'Not Provided'}}</td>
+                <td>{{formatDateTime(reg.registeredAt)}}</td>
+                <td>
+                  <span class="role-tag" ng-class="{'participant': reg.status === 'confirmed', 'admin': reg.status === 'cancelled'}">
+                    {{reg.status}}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div ng-if="!rosterModal.loading && (rosterModal.registrations | filter:filterRoster).length === 0" 
+             style="text-align: center; padding: 2.5rem 1rem; color: var(--text-secondary);">
+          <i class="fas fa-user-friends" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 0.75rem;"></i>
+          <p>No registered students match your search.</p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" ng-click="closeRosterModal()">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

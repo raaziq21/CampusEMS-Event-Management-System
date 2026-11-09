@@ -1,0 +1,173 @@
+<div class="dashboard-layout">
+  <!-- Sidebar -->
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-title">Account Settings</div>
+    <ul class="sidebar-nav">
+      <li>
+        <a href="#!/dashboard/profile" class="sidebar-link active">
+          <i class="fas fa-user-circle" style="width: 18px;"></i> Profile & Security
+        </a>
+      </li>
+      <li>
+        <a href="#!/events" class="sidebar-link">
+          <i class="fas fa-compass" style="width: 18px;"></i> Discover Events
+        </a>
+      </li>
+    </ul>
+
+    <div style="margin-top: 2rem; padding: 1rem; background: var(--bg-alt); border-radius: var(--radius-md); font-size: 0.8rem; color: var(--text-muted);">
+      <strong>Authentication:</strong> Cryptographic password hashing & signed JWT tokens.
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="dashboard-main">
+    <div class="section-header" style="margin-bottom: 2rem;">
+      <div>
+        <h1 class="section-title" style="font-size: 2rem;">Profile & Security Center</h1>
+        <p class="section-subtitle">Manage your personal credentials, contact details, and account security.</p>
+      </div>
+    </div>
+
+    <!-- Loader -->
+    <app-loader ng-if="loading" message="Loading your account profile..."></app-loader>
+
+    <div ng-if="!loading && user" style="max-width: 760px;">
+      <!-- Profile Header Summary Card -->
+      <div class="detail-card" style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.75rem;">
+        <div style="width: 68px; height: 68px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 800; box-shadow: 0 4px 12px var(--primary-glow);">
+          {{user.name.charAt(0).toUpperCase()}}
+        </div>
+        <div style="flex: 1;">
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary);">
+              {{user.name}}
+            </h2>
+            <span class="role-tag {{user.role}}">{{user.role}}</span>
+          </div>
+          <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.25rem;">
+            <i class="fas fa-envelope" style="color: var(--text-muted); margin-right: 0.35rem;"></i> {{user.email}}
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+            <i class="far fa-calendar-check" style="margin-right: 0.35rem;"></i> Member since {{formatDate(user.createdAt)}}
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="tabs-nav">
+        <button type="button" 
+                class="tab-btn" 
+                ng-class="{'active': activeTab === 'profile'}"
+                ng-click="activeTab = 'profile'">
+          <i class="fas fa-user-edit"></i> Profile Details
+        </button>
+        <button type="button" 
+                class="tab-btn" 
+                ng-class="{'active': activeTab === 'security'}"
+                ng-click="activeTab = 'security'">
+          <i class="fas fa-shield-alt"></i> Change Password & Security
+        </button>
+      </div>
+
+      <!-- Tab 1: Profile Details Form -->
+      <div class="detail-card" ng-if="activeTab === 'profile'">
+        <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 1.25rem;">
+          Edit Personal Details
+        </h3>
+
+        <form ng-submit="updateProfile()" novalidate>
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" 
+                   class="form-control" 
+                   ng-model="profileForm.name" 
+                   placeholder="e.g. Aarav Patel"
+                   required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">College Email Address (Immutable ID)</label>
+            <input type="email" 
+                   class="form-control" 
+                   ng-model="user.email" 
+                   disabled 
+                   style="background: var(--bg-alt); cursor: not-allowed; color: var(--text-secondary);">
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">
+              <i class="fas fa-lock"></i> College email is cryptographic identity anchor and cannot be changed.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Role Access Level</label>
+            <div style="padding: 0.65rem 1rem; background: var(--bg-alt); border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-weight: 600; text-transform: capitalize;">{{user.role}} Account</span>
+              <span class="role-tag {{user.role}}">{{user.role}}</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Contact Phone Number</label>
+            <input type="text" 
+                   class="form-control" 
+                   ng-model="profileForm.phone" 
+                   placeholder="+91 98765 43210">
+          </div>
+
+          <button type="submit" 
+                  class="btn btn-primary" 
+                  ng-disabled="savingProfile"
+                  style="margin-top: 0.5rem;">
+            <i class="fas fa-save"></i> {{savingProfile ? 'Saving Changes...' : 'Save Profile Details'}}
+          </button>
+        </form>
+      </div>
+
+      <!-- Tab 2: Security & Change Password -->
+      <div class="detail-card" ng-if="activeTab === 'security'">
+        <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem;">
+          Update Account Password
+        </h3>
+        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+          Passwords are encrypted using bcrypt with salt rounds before database persistence.
+        </p>
+
+        <form ng-submit="changePassword()" novalidate>
+          <div class="form-group">
+            <label class="form-label">Current Password *</label>
+            <input type="password" 
+                   class="form-control" 
+                   ng-model="passwordForm.currentPassword" 
+                   placeholder="Enter your current password"
+                   required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">New Password * (Min 6 characters)</label>
+            <input type="password" 
+                   class="form-control" 
+                   ng-model="passwordForm.newPassword" 
+                   placeholder="Enter strong new password"
+                   required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Confirm New Password *</label>
+            <input type="password" 
+                   class="form-control" 
+                   ng-model="passwordForm.confirmPassword" 
+                   placeholder="Re-type new password"
+                   required>
+          </div>
+
+          <button type="submit" 
+                  class="btn btn-primary" 
+                  ng-disabled="changingPassword"
+                  style="margin-top: 0.5rem;">
+            <i class="fas fa-key"></i> {{changingPassword ? 'Updating Password...' : 'Change Password'}}
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>

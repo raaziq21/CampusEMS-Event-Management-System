@@ -1,0 +1,66 @@
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="brand-icon" style="margin: 0 auto 1rem; width: 44px; height: 44px; font-size: 1.25rem;">
+        <i class="fas fa-lock"></i>
+      </div>
+      <h2>Portal Login</h2>
+      <p>Sign in to access your role-based dashboard</p>
+    </div>
+
+    <!-- Login Form -->
+    <form ng-submit="login()" novalidate>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <div style="position: relative;">
+          <input type="email" 
+                 class="form-control" 
+                 ng-model="credentials.email" 
+                 placeholder="name@college.edu" 
+                 required 
+                 autofocus>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" 
+               class="form-control" 
+               ng-model="credentials.password" 
+               placeholder="••••••••" 
+               required>
+      </div>
+
+      <button type="submit" 
+              class="btn btn-primary btn-lg" 
+              style="width: 100%; margin-top: 0.5rem;"
+              ng-disabled="submitting">
+        <i class="fas fa-sign-in-alt"></i> {{submitting ? 'Authenticating...' : 'Sign In'}}
+      </button>
+    </form>
+
+    <!-- Quick Demo Accounts (For Academic Evaluator Review) -->
+    <div class="demo-credentials-box">
+      <h4><i class="fas fa-vial"></i> Quick-Fill Demo Accounts:</h4>
+      <div class="demo-buttons-grid">
+        <button type="button" class="btn btn-outline btn-sm" ng-click="quickFill('admin')" title="Admin Role">
+          <i class="fas fa-shield-alt" style="color: var(--danger);"></i> Admin
+        </button>
+        <button type="button" class="btn btn-outline btn-sm" ng-click="quickFill('organizer')" title="Faculty Role">
+          <i class="fas fa-chalkboard-teacher" style="color: var(--accent);"></i> Organizer
+        </button>
+        <button type="button" class="btn btn-outline btn-sm" ng-click="quickFill('participant')" title="Student Role">
+          <i class="fas fa-user-graduate" style="color: var(--success);"></i> Participant
+        </button>
+      </div>
+      <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted); text-align: center;">
+        Password for all accounts: <code>College@2026</code>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 1.75rem; font-size: 0.9rem; color: var(--text-secondary);">
+      Don't have a participant account? 
+      <a href="#!/register" style="font-weight: 600;">Register here</a>
+    </div>
+  </div>
+</div>

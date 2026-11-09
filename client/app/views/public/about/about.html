@@ -1,0 +1,84 @@
+<div class="container section">
+  <div style="max-width: 860px; margin: 0 auto;">
+    <!-- Title -->
+    <div style="text-align: center; margin-bottom: 3.5rem;">
+      <span class="hero-badge">Academic Architecture Overview</span>
+      <h1 class="section-title" style="font-size: 2.75rem; margin-top: 0.5rem;">
+        About Campus Event Management System
+      </h1>
+      <p class="section-subtitle" style="font-size: 1.15rem;">
+        A full-stack, secure web platform developed for BCA Cybersecurity academic evaluation.
+      </p>
+    </div>
+
+    <!-- Objectives Card -->
+    <div class="detail-card">
+      <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; color: var(--text-primary);">
+        <i class="fas fa-bullseye" style="color: var(--primary); margin-right: 0.5rem;"></i>
+        Project Objective
+      </h2>
+      <p style="font-size: 1.05rem; line-height: 1.8; color: var(--text-secondary);">
+        The primary objective of this project is to architect a production-grade, three-tier Event Management System (EMS) designed for university and college campuses. It bridges the communication gap between student participants, faculty event organizers, and collegiate administrators while upholding strict cybersecurity standards.
+      </p>
+    </div>
+
+    <!-- Security Implementation Details -->
+    <div class="detail-card">
+      <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.25rem; color: var(--text-primary);">
+        <i class="fas fa-lock" style="color: var(--danger); margin-right: 0.5rem;"></i>
+        Cybersecurity Highlights
+      </h2>
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <div style="display: flex; gap: 1rem;">
+          <div style="color: var(--success); font-size: 1.2rem;"><i class="fas fa-check-circle"></i></div>
+          <div>
+            <strong>Cryptographic Password Hashing:</strong> Passwords are encrypted before database persistence using bcrypt with 10 salt rounds. Plain text credentials are never stored or logged.
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+          <div style="color: var(--success); font-size: 1.2rem;"><i class="fas fa-check-circle"></i></div>
+          <div>
+            <strong>JWT Stateless Authentication:</strong> Authenticated sessions rely on digitally signed JSON Web Tokens passed via HTTP Authorization headers.
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+          <div style="color: var(--success); font-size: 1.2rem;"><i class="fas fa-check-circle"></i></div>
+          <div>
+            <strong>Strict Role-Based Authorization:</strong> Protected endpoints verify roles (Admin, Organizer, Participant) directly on the Express server middleware layer, rather than relying on frontend view hiding.
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+          <div style="color: var(--success); font-size: 1.2rem;"><i class="fas fa-check-circle"></i></div>
+          <div>
+            <strong>Database Level Uniqueness & Race Prevention:</strong> MongoDB compound unique indexes guarantee that participants cannot double-book event seats.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tech Stack Grid -->
+    <div style="margin-top: 3rem;">
+      <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.5rem; text-align: center;">
+        Technology Architecture
+      </h2>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
+        <div class="detail-card" ng-repeat="tech in techStack" style="margin-bottom: 0;">
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+            <i class="{{tech.icon}}" style="font-size: 2rem; color: {{tech.color}};"></i>
+            <div>
+              <h3 style="font-size: 1.1rem; font-weight: 700;">{{tech.name}}</h3>
+              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">{{tech.category}}</span>
+            </div>
+          </div>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+            {{tech.desc}}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

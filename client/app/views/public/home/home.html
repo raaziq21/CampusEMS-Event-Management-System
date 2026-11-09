@@ -1,0 +1,127 @@
+<div>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero-content">
+      <div class="hero-badge">
+        <i class="fas fa-shield-alt"></i> BCA Cybersecurity College Project 2026
+      </div>
+
+      <h1 class="hero-title">
+        Discover, Manage & Lead <br>
+        <span class="gradient-text">College Tech & Campus Events</span>
+      </h1>
+
+      <p class="hero-desc">
+        A unified Event Management System built on MongoDB, Express, AngularJS, and Node.js. 
+        Empowering students to participate, organizers to manage, and administrators to oversee campus excellence.
+      </p>
+
+      <div class="hero-actions">
+        <a href="#!/events" class="btn btn-primary btn-lg">
+          <i class="fas fa-compass"></i> Discover Events
+        </a>
+        <a href="#!/register" class="btn btn-outline btn-lg">
+          <i class="fas fa-user-plus"></i> Join as Participant
+        </a>
+        <a href="#!/login" class="btn btn-outline-primary btn-lg">
+          <i class="fas fa-sign-in-alt"></i> Portal Login
+        </a>
+      </div>
+
+      <!-- Hero Stats Bar -->
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-number">8+</div>
+          <div class="stat-label">Campus Summits</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">500+</div>
+          <div class="stat-label">Student Capacity</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Cloud MongoDB</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">3</div>
+          <div class="stat-label">Security Roles</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Events Section -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Upcoming Featured Summits</h2>
+          <p class="section-subtitle">Register early to secure your seat before capacity fills up.</p>
+        </div>
+        <a href="#!/events" class="btn btn-outline-primary">
+          View All Events <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+
+      <!-- Loader -->
+      <app-loader ng-if="loading" message="Loading featured campus events..."></app-loader>
+
+      <!-- Events Grid -->
+      <div class="events-grid" ng-if="!loading && featuredEvents.length > 0">
+        <event-card ng-repeat="event in featuredEvents track by event._id" event="event"></event-card>
+      </div>
+
+      <!-- Empty State -->
+      <div ng-if="!loading && featuredEvents.length === 0" style="text-align: center; padding: 4rem 1rem;">
+        <i class="fas fa-calendar-times" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+        <h3>No Upcoming Events Available</h3>
+        <p style="color: var(--text-secondary); margin-top: 0.5rem;">Check back later or browse all events in the catalog.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Role Pillars Section -->
+  <section class="section section-alt">
+    <div class="container">
+      <div style="text-align: center; max-width: 700px; margin: 0 auto 3.5rem;">
+        <h2 class="section-title">Built with True Role-Based Security</h2>
+        <p class="section-subtitle">Strict backend authorization guards every single endpoint, keeping participants, organizers, and admins strictly segregated.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+        <!-- Card 1 -->
+        <div class="detail-card" style="margin-bottom: 0;">
+          <div style="width: 50px; height: 50px; border-radius: 12px; background: #ecfdf5; color: #047857; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 1.25rem;">
+            <i class="fas fa-user-graduate"></i>
+          </div>
+          <h3 style="font-size: 1.35rem; margin-bottom: 0.75rem;">Participant Desk</h3>
+          <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">
+            Discover tech hackathons, workshops, and seminars. Register instantly with zero duplicate bookings and monitor personal registrations anytime.
+          </p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="detail-card" style="margin-bottom: 0;">
+          <div style="width: 50px; height: 50px; border-radius: 12px; background: #f5f3ff; color: #6d28d9; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 1.25rem;">
+            <i class="fas fa-chalkboard-teacher"></i>
+          </div>
+          <h3 style="font-size: 1.35rem; margin-bottom: 0.75rem;">Faculty Organizer Desk</h3>
+          <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">
+            Manage assigned events, update status from upcoming to ongoing or completed, and export or review registered student rosters in real-time.
+          </p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="detail-card" style="margin-bottom: 0;">
+          <div style="width: 50px; height: 50px; border-radius: 12px; background: #fef2f2; color: #b91c1c; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 1.25rem;">
+            <i class="fas fa-user-shield"></i>
+          </div>
+          <h3 style="font-size: 1.35rem; margin-bottom: 0.75rem;">Administrator Console</h3>
+          <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">
+            Full CRUD control over all events, assigning faculty organizers, viewing live registration charts, and controlling platform user roles.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

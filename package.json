@@ -1,0 +1,25 @@
+{
+  "name": "campus-event-management-system",
+  "version": "1.0.0",
+  "description": "Full-Stack Campus Event Management System — BCA Cybersecurity Final Project",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "seed": "node server/seed.js",
+    "build": "npm install --prefix server",
+    "postinstall": "npm install --prefix server"
+  },
+  "keywords": [
+    "angularjs",
+    "nodejs",
+    "express",
+    "mongodb",
+    "cybersecurity",
+    "event-management-system"
+  ],
+  "author": "BCA Cybersecurity Scholar",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

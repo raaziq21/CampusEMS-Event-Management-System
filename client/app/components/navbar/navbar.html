@@ -1,0 +1,51 @@
+<header class="site-header">
+  <div class="container navbar">
+    <!-- Brand -->
+    <a href="#!/" class="brand" ng-click="closeMenu()">
+      <div class="brand-icon">
+        <i class="fas fa-calendar-alt"></i>
+      </div>
+      <div class="brand-text">Campus<span>EMS</span></div>
+    </a>
+
+    <!-- Navigation Links -->
+    <ul class="nav-links" ng-class="{'open': menuOpen}">
+      <li><a href="#!/" class="nav-link" ng-class="{'active': isActive('/')}" ng-click="closeMenu()">Home</a></li>
+      <li><a href="#!/events" class="nav-link" ng-class="{'active': isActive('/events')}" ng-click="closeMenu()">Discover Events</a></li>
+      <li><a href="#!/about" class="nav-link" ng-class="{'active': isActive('/about')}" ng-click="closeMenu()">About</a></li>
+      <li><a href="#!/contact" class="nav-link" ng-class="{'active': isActive('/contact')}" ng-click="closeMenu()">Contact</a></li>
+    </ul>
+
+    <!-- Actions / User Menu -->
+    <div class="nav-actions">
+      <!-- Guest State -->
+      <div ng-if="!isAuthenticated()" style="display: flex; gap: 0.65rem;">
+        <a href="#!/login" class="btn btn-outline btn-sm">Log In</a>
+        <a href="#!/register" class="btn btn-primary btn-sm">Sign Up</a>
+      </div>
+
+      <!-- Authenticated State -->
+      <div ng-if="isAuthenticated()" style="display: flex; align-items: center; gap: 0.75rem;">
+        <a ng-href="#!{{getDashboardRoute()}}" class="user-menu-badge" title="Go to Dashboard">
+          <i class="fas fa-user-circle" style="color: var(--primary); font-size: 1.1rem;"></i>
+          <span>{{getUser().name.split(' ')[0]}}</span>
+          <span class="role-tag {{getUser().role}}">{{getUser().role}}</span>
+        </a>
+
+        <a ng-href="#!{{getDashboardRoute()}}" class="btn btn-outline-primary btn-sm" title="Dashboard">
+          <i class="fas fa-columns"></i>
+          <span class="hide-mobile">Dashboard</span>
+        </a>
+
+        <button type="button" class="btn btn-outline btn-sm" ng-click="logout()" title="Logout">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+
+      <!-- Mobile Toggle -->
+      <button type="button" class="mobile-toggle" ng-click="toggleMenu()" aria-label="Toggle navigation">
+        <i class="fas" ng-class="{'fa-bars': !menuOpen, 'fa-times': menuOpen}"></i>
+      </button>
+    </div>
+  </div>
+</header>

@@ -1,0 +1,89 @@
+<div class="container section">
+  <!-- Page Header -->
+  <div class="section-header">
+    <div>
+      <h1 class="section-title">Discover Campus Events</h1>
+      <p class="section-subtitle">Browse, filter, and register for tech hackathons, symposiums, and college events.</p>
+    </div>
+    <div style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">
+      Showing {{events.length}} of {{pagination.total}} total events
+    </div>
+  </div>
+
+  <!-- Filter & Search Toolbar -->
+  <div class="filter-bar">
+    <!-- Search Input -->
+    <div class="search-input-group">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" 
+             class="search-input" 
+             placeholder="Search by title, topic or keyword..."
+             ng-model="filters.search"
+             ng-keydown="$event.keyCode === 13 && applyFilters()">
+    </div>
+
+    <!-- Category Dropdown -->
+    <select class="filter-select" ng-model="filters.category" ng-change="applyFilters()">
+      <option ng-repeat="cat in categories" value="{{cat.value}}">{{cat.label}}</option>
+    </select>
+
+    <!-- Status Dropdown -->
+    <select class="filter-select" ng-model="filters.status" ng-change="applyFilters()">
+      <option ng-repeat="st in statuses" value="{{st.value}}">{{st.label}}</option>
+    </select>
+
+    <!-- Sort Dropdown -->
+    <select class="filter-select" ng-model="filters.sort" ng-change="applyFilters()">
+      <option ng-repeat="so in sortOptions" value="{{so.value}}">{{so.label}}</option>
+    </select>
+
+    <!-- Filter Actions -->
+    <div style="display: flex; gap: 0.5rem;">
+      <button type="button" class="btn btn-primary btn-sm" ng-click="applyFilters()">
+        <i class="fas fa-filter"></i> Filter
+      </button>
+      <button type="button" class="btn btn-outline btn-sm" ng-click="resetFilters()" title="Reset Filters">
+        <i class="fas fa-undo"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loader -->
+  <app-loader ng-if="loading" message="Querying events catalog..."></app-loader>
+
+  <!-- Events Grid -->
+  <div class="events-grid" ng-if="!loading && events.length > 0">
+    <event-card ng-repeat="event in events track by event._id" event="event"></event-card>
+  </div>
+
+  <!-- Empty Results -->
+  <div ng-if="!loading && events.length === 0" style="text-align: center; padding: 4rem 1rem; background: var(--bg-surface); border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
+    <i class="fas fa-search" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+    <h3>No Events Found</h3>
+    <p style="color: var(--text-secondary); margin: 0.5rem 0 1.5rem;">Try adjusting your search criteria or resetting filters.</p>
+    <button type="button" class="btn btn-outline-primary" ng-click="resetFilters()">
+      Reset All Filters
+    </button>
+  </div>
+
+  <!-- Pagination Controls -->
+  <div ng-if="!loading && pagination.pages > 1" style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 3.5rem;">
+    <button type="button" 
+            class="btn btn-outline btn-sm" 
+            ng-disabled="pagination.current <= 1"
+            ng-click="goToPage(pagination.current - 1)">
+      <i class="fas fa-chevron-left"></i> Previous
+    </button>
+
+    <span style="font-size: 0.9rem; font-weight: 600; padding: 0 1rem; color: var(--text-secondary);">
+      Page {{pagination.current}} of {{pagination.pages}}
+    </span>
+
+    <button type="button" 
+            class="btn btn-outline btn-sm" 
+            ng-disabled="pagination.current >= pagination.pages"
+            ng-click="goToPage(pagination.current + 1)">
+      Next <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
+</div>

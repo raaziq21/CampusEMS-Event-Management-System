@@ -1,0 +1,7 @@
+<div class="alert-container" ng-if="alerts.length > 0">
+  <div ng-repeat="alert in alerts track by alert.id" 
+       class="alert alert-{{alert.type}}">
+    <span>{{alert.message}}</span>
+    <button type="button" class="alert-close" ng-click="closeAlert(alert.id)">&times;</button>
+  </div>
+</div>
